@@ -1,0 +1,16 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Musical1C__frontend", "Musical1C__frontend\Musical1C__frontend.csproj", "{402A10B4-3CC4-4EEE-A427-6BA79093DD7A}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{402A10B4-3CC4-4EEE-A427-6BA79093DD7A}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{402A10B4-3CC4-4EEE-A427-6BA79093DD7A}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{402A10B4-3CC4-4EEE-A427-6BA79093DD7A}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{402A10B4-3CC4-4EEE-A427-6BA79093DD7A}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal

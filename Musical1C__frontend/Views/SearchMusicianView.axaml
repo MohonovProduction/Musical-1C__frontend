@@ -1,0 +1,43 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:Musical1C__frontend.ViewModels"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Musical1C__frontend.Views.SearchMusicianView"
+             x:DataType="viewModels:SearchMusicianViewModel">
+    <StackPanel
+        Orientation="Horizontal"
+        >
+        <Grid
+            Margin="5"
+            ShowGridLines="False"
+            ColumnDefinitions="200,*"
+            RowDefinitions="Auto,Auto, Auto, *">
+            <Button Command="{ Binding SwitchToMainContentViewModelCommand }" Grid.Column="0" Grid.Row="0" Content="Main Page" Width="110" Margin="1 1"></Button>
+        </Grid>
+        <Grid
+            ColumnDefinitions="300 Auto"
+            >
+            <TextBox
+                Grid.Column="0"
+                Watermark="Search query"
+                Margin="5"
+                Height="0"
+            ></TextBox>
+            <Button
+                Grid.Column="1"
+                Content="Search"
+                ></Button>
+        </Grid>
+    
+        <WrapPanel>
+            <ItemsControl>
+                <ItemsControl.ItemTemplate>
+                    
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </WrapPanel>
+        
+    </StackPanel>
+</UserControl>
