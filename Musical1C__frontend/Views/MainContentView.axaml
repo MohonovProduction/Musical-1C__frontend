@@ -10,7 +10,9 @@
         Margin="5"
         ShowGridLines="False"
         ColumnDefinitions="200,*"
-        RowDefinitions="Auto,Auto, Auto, *">
+        RowDefinitions="Auto,Auto, Auto, *"
+        HorizontalAlignment="Center"
+        VerticalAlignment="Center">
         <Button Command="{ Binding NavigateToSearchMusicianViewModelViewModelCommand }" Grid.Column="0" Grid.Row="0" Content="Find musician" Width="110" Margin="1 1"></Button>
         <Button Command="{ Binding NavigateToCreateViewModelCommand }" Grid.Column="0" Grid.Row="1" Content="New Concert" Width="110" Margin="1 1"></Button>
         <Button Command="{ Binding NavigateToGetHistoryViewModelCommand }" Grid.Column="0" Grid.Row="2" Content="Get history" Width="110" Margin="1 1"></Button>

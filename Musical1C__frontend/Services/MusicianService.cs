@@ -4,7 +4,9 @@ using System.Net.Http;
 using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
+using Musical1C__frontend.Services.Requests;
 using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Musical1C__frontend.Services
 {
@@ -18,13 +20,21 @@ namespace Musical1C__frontend.Services
             _httpClient = new HttpClient { BaseAddress = new Uri(BaseUrl) };
         }
 
+        private static JsonSerializerSettings JsonSettings => new JsonSerializerSettings
+        {
+            PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+            ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+            Formatting = Formatting.Indented,
+            ContractResolver = new CamelCasePropertyNamesContractResolver()
+        };
+
         // Получение всех музыкантов
         public async Task<List<MusicianResponse>> GetMusiciansAsync(CancellationToken token = default)
         {
             var response = await _httpClient.GetAsync(BaseUrl, token);
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync(token);
-            return JsonConvert.DeserializeObject<List<MusicianResponse>>(content);
+            return JsonConvert.DeserializeObject<List<MusicianResponse>>(content, JsonSettings);
         }
 
         // Получение музыканта по ID
@@ -36,13 +46,13 @@ namespace Musical1C__frontend.Services
                 throw new Exception($"Error fetching musician with ID {id}: {response.ReasonPhrase}");
 
             var content = await response.Content.ReadAsStringAsync(token);
-            return JsonConvert.DeserializeObject<MusicianResponse>(content);
+            return JsonConvert.DeserializeObject<MusicianResponse>(content, JsonSettings);
         }
 
         // Добавление музыканта
         public async Task<MusicianResponse> AddMusicianAsync(MusicianRequest request, CancellationToken token = default)
         {
-            var jsonContent = JsonConvert.SerializeObject(request);
+            var jsonContent = JsonConvert.SerializeObject(request, JsonSettings);
             var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PostAsync(BaseUrl, content, token);
@@ -51,7 +61,7 @@ namespace Musical1C__frontend.Services
                 throw new Exception($"Error adding musician: {response.ReasonPhrase}");
 
             var responseContent = await response.Content.ReadAsStringAsync(token);
-            return JsonConvert.DeserializeObject<MusicianResponse>(responseContent);
+            return JsonConvert.DeserializeObject<MusicianResponse>(responseContent, JsonSettings);
         }
 
         // Удаление музыканта по ID
@@ -62,29 +72,36 @@ namespace Musical1C__frontend.Services
             if (!response.IsSuccessStatusCode)
                 throw new Exception($"Error deleting musician with ID {id}: {response.ReasonPhrase}");
         }
+
+        // Метод для поиска музыкантов по фамилии
+        public async Task<List<MusicianResponse>?> SearchMusiciansByLastNameAsync(string lastName,
+            CancellationToken token = default)
+        {
+            try
+            {
+                if (string.IsNullOrWhiteSpace(lastName))
+                    throw new ArgumentException("Last name cannot be empty.", nameof(lastName));
+
+                var response = await _httpClient.GetAsync($"{BaseUrl}/search?lastName={Uri.EscapeDataString(lastName)}",
+                    token);
+
+                if (!response.IsSuccessStatusCode)
+                    throw new Exception(
+                        $"Error searching musicians by last name \"{lastName}\": {response.ReasonPhrase}");
+
+                var content = await response.Content.ReadAsStringAsync(token);
+
+                return JsonConvert.DeserializeObject<List<MusicianResponse>>(content, JsonSettings);
+            }
+            catch (Exception e)
+            {
+                Console.WriteLine(e);
+                throw;
+            }
+        }
     }
 
     // Модели для десериализации данных
-    public record MusicianResponse
-    {
-        [JsonProperty("id")]
-        public Guid Id { get; set; }
-
-        [JsonProperty("name")]
-        public string Name { get; set; }
-
-        [JsonProperty("lastName")]
-        public string LastName { get; set; }
-
-        [JsonProperty("surname")]
-        public string Surname { get; set; }
-
-        [JsonProperty("instruments")]
-        public List<Instrument> Instruments { get; set; }
-
-        [JsonProperty("concerts")]
-        public List<Concert> Concerts { get; set; }
-    }
 
     public record Instrument
     {
@@ -108,23 +125,5 @@ namespace Musical1C__frontend.Services
 
         [JsonProperty("date")]
         public DateTime Date { get; set; }
-    }
-
-    public record MusicianRequest
-    {
-        [JsonProperty("name")]
-        public string Name { get; set; }
-
-        [JsonProperty("lastName")]
-        public string LastName { get; set; }
-
-        [JsonProperty("surname")]
-        public string Surname { get; set; }
-
-        [JsonProperty("instruments")]
-        public List<Instrument> Instruments { get; set; }
-
-        [JsonProperty("concerts")]
-        public List<Concert> Concerts { get; set; }
     }
 }

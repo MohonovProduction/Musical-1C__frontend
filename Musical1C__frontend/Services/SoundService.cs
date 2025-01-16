@@ -5,6 +5,7 @@ using System.Text;
 using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Musical1C__frontend.Services.Responses;
 
 namespace Musical1C__frontend.Services
 {
@@ -75,15 +76,6 @@ namespace Musical1C__frontend.Services
 
             response.EnsureSuccessStatusCode();
         }
-    }
-
-    // DTO классы для сериализации/десериализации
-    public class SoundResponse
-    {
-        public Guid Id { get; set; }
-        public string Name { get; set; }
-        public string Author { get; set; }
-        public List<SoundOnConcertResponse> SoundOnConcerts { get; set; }
     }
 
     public class SoundOnConcertResponse

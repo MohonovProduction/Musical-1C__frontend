@@ -3,11 +3,14 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:Musical1C__frontend.ViewModels"
+             xmlns:services="clr-namespace:Musical1C__frontend.Services"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Musical1C__frontend.Views.SearchMusicianView"
-             x:DataType="viewModels:SearchMusicianViewModel">
+             x:DataType="viewModels:SearchMusicianViewModel"
+             >
     <StackPanel
         Orientation="Horizontal"
+        VerticalAlignment="Top"
         >
         <Grid
             Margin="5"
@@ -16,28 +19,54 @@
             RowDefinitions="Auto,Auto, Auto, *">
             <Button Command="{ Binding SwitchToMainContentViewModelCommand }" Grid.Column="0" Grid.Row="0" Content="Main Page" Width="110" Margin="1 1"></Button>
         </Grid>
-        <Grid
-            ColumnDefinitions="300 Auto"
-            >
-            <TextBox
-                Grid.Column="0"
-                Watermark="Search query"
-                Margin="5"
-                Height="0"
-            ></TextBox>
-            <Button
-                Grid.Column="1"
-                Content="Search"
-                ></Button>
-        </Grid>
-    
-        <WrapPanel>
-            <ItemsControl>
-                <ItemsControl.ItemTemplate>
-                    
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </WrapPanel>
+        <StackPanel
+            Orientation="Vertical">
+            <StackPanel
+                        Orientation="Horizontal"
+                        >
+                        <TextBox
+                            Text="{ Binding SearchText }"
+                            Watermark="Search query"
+                            Margin="5"
+                            Height="0"
+                        ></TextBox>
+                        <Button
+                            Content="Search"
+                            Command="{ Binding SearchCommand }"
+                            ></Button>
+                    </StackPanel>
+                
+                <ScrollViewer>
+                        <StackPanel
+                            Spacing="5">
+                            <ItemsControl 
+                                ItemsSource="{Binding _musicians}">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate  DataType="{x:Type services:MusicianResponse}">
+                                        <Border
+                                            BorderBrush="Azure"
+                                            Opacity="0.5"
+                                            BorderThickness="2"
+                                            CornerRadius="5"
+                                            Margin="0 0 0 5 "
+                                            Padding="5"
+                                        >
+                                            <StackPanel 
+                                                Orientation="Horizontal" 
+                                                VerticalAlignment="Center" 
+                                                Margin="0,0,0,12"
+                                                Spacing="10">
+                                                <TextBlock Text="{Binding LastName}" />
+                                                <TextBlock Text="{Binding Name}" />
+                                                <TextBlock Text="{Binding Surname}" />
+                                            </StackPanel>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                        </StackPanel>
+                    </ScrollViewer>
+        </StackPanel>
         
     </StackPanel>
 </UserControl>

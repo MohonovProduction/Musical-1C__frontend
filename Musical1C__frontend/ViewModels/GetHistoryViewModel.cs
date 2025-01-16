@@ -3,7 +3,6 @@ using System.Collections.ObjectModel;
 using System.Threading;
 using System.Threading.Tasks;
 using System.Windows.Input;
-using AvaloniaUI.Services;
 using CommunityToolkit.Mvvm.Input;
 using Musical1C__frontend.Services;
 

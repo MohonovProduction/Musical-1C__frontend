@@ -3,7 +3,7 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:Musical1C__frontend.ViewModels"
-             xmlns:models="clr-namespace:AvaloniaUI.Services"
+             xmlns:models="clr-namespace:Musical1C__frontend.Services"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Musical1C__frontend.Views.GetHistoryView"
              x:DataType="viewModels:GetHistoryViewModel">
@@ -16,7 +16,8 @@
             <Button Command="{ Binding SwitchToMainContentViewModelCommand }" Grid.Column="0" Grid.Row="0" Content="Main Page" Width="110" Margin="1 1"></Button>
         </Grid>
         
-        <ScrollViewer>
+        <ScrollViewer
+            VerticalScrollBarVisibility="Visible">
             <StackPanel
                 Spacing="5">
                 
@@ -32,7 +33,6 @@
                                 Margin="0 0 0 5 "
                                 Padding="5"
                                 >
-                                
                                 <StackPanel 
                                     Orientation="Horizontal" 
                                     VerticalAlignment="Center" 
