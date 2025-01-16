@@ -1,0 +1,53 @@
+<UserControl xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:viewModels="clr-namespace:Musical1C__frontend.ViewModels"
+             xmlns:models="clr-namespace:AvaloniaUI.Services"
+             mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
+             x:Class="Musical1C__frontend.Views.GetHistoryView"
+             x:DataType="viewModels:GetHistoryViewModel">
+    <StackPanel Orientation="Horizontal">
+        <Grid
+            Margin="5"
+            ShowGridLines="False"
+            ColumnDefinitions="200,*"
+            RowDefinitions="Auto,Auto, Auto, *">
+            <Button Command="{ Binding SwitchToMainContentViewModelCommand }" Grid.Column="0" Grid.Row="0" Content="Main Page" Width="110" Margin="1 1"></Button>
+        </Grid>
+        
+        <ScrollViewer>
+            <StackPanel
+                Spacing="5">
+                
+                <ItemsControl 
+                    ItemsSource="{Binding _concerts}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate  DataType="{x:Type models:ConcertResponse}">
+                            <Border
+                                BorderBrush="Azure"
+                                Opacity="0.5"
+                                BorderThickness="2"
+                                CornerRadius="5"
+                                Margin="0 0 0 5 "
+                                Padding="5"
+                                >
+                                
+                                <StackPanel 
+                                    Orientation="Horizontal" 
+                                    VerticalAlignment="Center" 
+                                    Margin="0,0,0,12"
+                                    Spacing="10">
+                                    <TextBlock Text="{Binding Date}" />
+                                    <TextBlock Text="{Binding Type}" />
+                                    <TextBlock Text="{Binding Name}" />
+                                </StackPanel>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                
+            </StackPanel>
+        </ScrollViewer>
+    </StackPanel>
+</UserControl>
