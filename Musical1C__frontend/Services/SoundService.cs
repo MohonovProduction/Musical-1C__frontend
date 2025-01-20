@@ -2,85 +2,90 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
-using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
+using Musical1C__frontend.Services.Requests;
 using Musical1C__frontend.Services.Responses;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace Musical1C__frontend.Services
 {
-    public class SoundsService
+    public class SoundService
     {
         private readonly HttpClient _httpClient;
-        private const string BaseUrl = "https://localhost:5001/api/Sounds"; // Замените на ваш адрес API
+        private const string BaseUrl = "http://localhost:5017/api/Sounds"; // Replace with your API address
 
-        public SoundsService(HttpClient httpClient)
+        public SoundService()
         {
-            _httpClient = httpClient;
+            _httpClient = new HttpClient { BaseAddress = new Uri(BaseUrl) };
         }
 
-        // Получение всех звуков
-        public async Task<List<SoundResponse>> GetSoundsAsync(CancellationToken token)
+        private static JsonSerializerSettings JsonSettings => new JsonSerializerSettings
+        {
+            PreserveReferencesHandling = PreserveReferencesHandling.Objects,
+            ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
+            Formatting = Formatting.Indented,
+            ContractResolver = new CamelCasePropertyNamesContractResolver()
+        };
+
+        // Get all sounds
+        public async Task<List<SoundResponse>> GetSoundsAsync(CancellationToken token = default)
         {
             var response = await _httpClient.GetAsync(BaseUrl, token);
             response.EnsureSuccessStatusCode();
-
             var content = await response.Content.ReadAsStringAsync(token);
-            return JsonSerializer.Deserialize<List<SoundResponse>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            return JsonConvert.DeserializeObject<List<SoundResponse>>(content, JsonSettings);
         }
 
-        // Получение звука по ID
-        public async Task<SoundResponse> GetSoundByIdAsync(Guid id, CancellationToken token)
+        // Get sound by ID
+        public async Task<SoundResponse> GetSoundByIdAsync(Guid id, CancellationToken token = default)
         {
             var response = await _httpClient.GetAsync($"{BaseUrl}/{id}", token);
 
-            if (response.IsSuccessStatusCode)
-            {
-                var content = await response.Content.ReadAsStringAsync(token);
-                return JsonSerializer.Deserialize<SoundResponse>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-            }
+            if (!response.IsSuccessStatusCode)
+                throw new Exception($"Error fetching sound with ID {id}: {response.ReasonPhrase}");
 
-            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                return null;
-            }
-
-            response.EnsureSuccessStatusCode();
-            return null;
+            var content = await response.Content.ReadAsStringAsync(token);
+            return JsonConvert.DeserializeObject<SoundResponse>(content, JsonSettings);
         }
 
-        // Добавление нового звука
-        public async Task AddSoundAsync(string name, string author, CancellationToken token)
+        // Add a sound
+        public async Task<SoundResponse> AddSoundAsync(SoundRequest request, CancellationToken token = default)
         {
-            var requestBody = new
-            {
-                Name = name,
-                Author = author
-            };
-
-            var content = new StringContent(JsonSerializer.Serialize(requestBody), Encoding.UTF8, "application/json");
+            var jsonContent = JsonConvert.SerializeObject(request, JsonSettings);
+            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
             var response = await _httpClient.PostAsync(BaseUrl, content, token);
-            response.EnsureSuccessStatusCode();
+
+            if (!response.IsSuccessStatusCode)
+                throw new Exception($"Error adding sound: {response.ReasonPhrase}");
+
+            var responseContent = await response.Content.ReadAsStringAsync(token);
+            return JsonConvert.DeserializeObject<SoundResponse>(responseContent, JsonSettings);
         }
 
-        // Удаление звука
-        public async Task DeleteSoundAsync(Guid id, CancellationToken token)
+        // Delete a sound by ID
+        public async Task DeleteSoundAsync(Guid id, CancellationToken token = default)
         {
             var response = await _httpClient.DeleteAsync($"{BaseUrl}/{id}", token);
 
-            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
-            {
-                throw new Exception($"Sound with ID {id} not found.");
-            }
-
-            response.EnsureSuccessStatusCode();
+            if (!response.IsSuccessStatusCode)
+                throw new Exception($"Error deleting sound with ID {id}: {response.ReasonPhrase}");
         }
     }
 
-    public class SoundOnConcertResponse
+    // Models for deserialization
+
+    public record SoundOnConcertResponse
     {
+        [JsonProperty("id")]
+        public Guid Id { get; set; }
+
+        [JsonProperty("soundId")]
         public Guid SoundId { get; set; }
+
+        [JsonProperty("concertId")]
         public Guid ConcertId { get; set; }
     }
 }

@@ -5,6 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using Musical1C__frontend.Services;
+using Musical1C__frontend.Services.Responses;
 
 namespace Musical1C__frontend.ViewModels;
 
@@ -38,7 +39,13 @@ public class GetHistoryViewModel : ViewModelBase
 
             foreach (var concert in concerts)
             {
+                if (concert == null)
+                {
+                    Console.WriteLine("null");
+                    continue;
+                }
                 _concerts.Add(concert);
+                Console.WriteLine(concert.Name);
             }
         }
         catch (Exception ex)

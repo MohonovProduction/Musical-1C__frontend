@@ -2,7 +2,7 @@ using System;
 using System.Collections.Generic;
 using Newtonsoft.Json;
 
-namespace Musical1C__frontend.Services;
+namespace Musical1C__frontend.Services.Responses;
 
 public record MusicianResponse
 {

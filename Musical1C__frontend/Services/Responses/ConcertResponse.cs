@@ -1,9 +1,8 @@
 using System;
 using System.Collections.Generic;
-using Musical1C__frontend.Services.Responses;
 using Newtonsoft.Json;
 
-namespace Musical1C__frontend.Services;
+namespace Musical1C__frontend.Services.Responses;
 
 public class ConcertResponse
 {

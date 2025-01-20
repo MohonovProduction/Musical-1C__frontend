@@ -5,6 +5,7 @@ using System.Text;
 using System.Threading;
 using System.Threading.Tasks;
 using Musical1C__frontend.Services.Requests;
+using Musical1C__frontend.Services.Responses;
 using Newtonsoft.Json;
 using Newtonsoft.Json.Serialization;
 
@@ -34,6 +35,11 @@ namespace Musical1C__frontend.Services
             var response = await _httpClient.GetAsync(BaseUrl, token);
             response.EnsureSuccessStatusCode();
             var content = await response.Content.ReadAsStringAsync(token);
+            
+            Console.WriteLine(content);
+            
+            Console.WriteLine(JsonConvert.DeserializeObject<List<MusicianResponse>>(content, JsonSettings));
+            
             return JsonConvert.DeserializeObject<List<MusicianResponse>>(content, JsonSettings);
         }
 

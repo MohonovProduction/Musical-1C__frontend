@@ -4,6 +4,7 @@
     <option name="projectPerEditor">
       <map>
         <entry key="Musical1C__frontend/App.axaml" value="Musical1C__frontend/Musical1C__frontend.csproj" />
+        <entry key="Musical1C__frontend/Views/CreateConcertPusyView.axaml" value="Musical1C__frontend/Musical1C__frontend.csproj" />
         <entry key="Musical1C__frontend/Views/CreateConcertView.axaml" value="Musical1C__frontend/Musical1C__frontend.csproj" />
         <entry key="Musical1C__frontend/Views/GetHistoryView.axaml" value="Musical1C__frontend/Musical1C__frontend.csproj" />
         <entry key="Musical1C__frontend/Views/MainContentView.axaml" value="Musical1C__frontend/Musical1C__frontend.csproj" />

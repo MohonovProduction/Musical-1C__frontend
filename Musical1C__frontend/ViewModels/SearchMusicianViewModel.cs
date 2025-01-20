@@ -5,6 +5,7 @@ using System.Windows.Input;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Musical1C__frontend.Services;
+using Musical1C__frontend.Services.Responses;
 using Storage;
 
 namespace Musical1C__frontend.ViewModels;
@@ -35,6 +36,8 @@ public partial class SearchMusicianViewModel : ViewModelBase
 
     public async void GetMusiciansByLastName()
     {
+        _musicians.Clear();
+        
         if (string.IsNullOrWhiteSpace(_searchText)) return;
 
         try
