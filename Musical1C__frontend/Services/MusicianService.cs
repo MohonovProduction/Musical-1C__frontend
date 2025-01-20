@@ -1,135 +1,75 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
+using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Musical1C__frontend.Services.Requests;
-using Musical1C__frontend.Services.Responses;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+using Musical1C__frontend.Services.ResReq;
 
 namespace Musical1C__frontend.Services
 {
     public class MusicianService
     {
         private readonly HttpClient _httpClient;
-        private const string BaseUrl = "http://localhost:5017/api/Musician"; // Замените на ваш адрес API
+        private const string BaseUrl = "http://localhost:5017/api/Musician";
 
         public MusicianService()
         {
-            _httpClient = new HttpClient { BaseAddress = new Uri(BaseUrl) };
+            _httpClient = new HttpClient{BaseAddress = new Uri(BaseUrl)};
         }
 
-        private static JsonSerializerSettings JsonSettings => new JsonSerializerSettings
+        public async Task<MusicianResponse> AddMusicianAsync(AddMusicianRequest request, CancellationToken token = default)
         {
-            PreserveReferencesHandling = PreserveReferencesHandling.Objects,
-            ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
-            Formatting = Formatting.Indented,
-            ContractResolver = new CamelCasePropertyNamesContractResolver()
-        };
+            var response = await _httpClient.PostAsJsonAsync(BaseUrl, request, token);
+            response.EnsureSuccessStatusCode();
 
-        // Получение всех музыкантов
+            return await response.Content.ReadFromJsonAsync<MusicianResponse>(cancellationToken: token);
+        }
+
+        public async Task<MusicianResponse> GetMusicianByIdAsync(Guid id, CancellationToken token = default)
+        {
+            var response = await _httpClient.GetAsync($"{BaseUrl}/{id}", token);
+            if (response.IsSuccessStatusCode)
+            {
+                return await response.Content.ReadFromJsonAsync<MusicianResponse>(cancellationToken: token);
+            }
+
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            {
+                return null;
+            }
+
+            response.EnsureSuccessStatusCode();
+            return null;
+        }
+
         public async Task<List<MusicianResponse>> GetMusiciansAsync(CancellationToken token = default)
         {
             var response = await _httpClient.GetAsync(BaseUrl, token);
             response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync(token);
-            
-            Console.WriteLine(content);
-            
-            Console.WriteLine(JsonConvert.DeserializeObject<List<MusicianResponse>>(content, JsonSettings));
-            
-            return JsonConvert.DeserializeObject<List<MusicianResponse>>(content, JsonSettings);
+
+            return await response.Content.ReadFromJsonAsync<List<MusicianResponse>>(cancellationToken: token);
         }
 
-        // Получение музыканта по ID
-        public async Task<MusicianResponse> GetMusicianByIdAsync(Guid id, CancellationToken token = default)
+        public async Task<List<MusicianResponse>> SearchMusiciansByLastNameAsync(string lastName, CancellationToken token = default)
         {
-            var response = await _httpClient.GetAsync($"{BaseUrl}/{id}", token);
-
-            if (!response.IsSuccessStatusCode)
-                throw new Exception($"Error fetching musician with ID {id}: {response.ReasonPhrase}");
-
-            var content = await response.Content.ReadAsStringAsync(token);
-            return JsonConvert.DeserializeObject<MusicianResponse>(content, JsonSettings);
+            var response = await _httpClient.GetAsync($"{BaseUrl}/search?lastname={lastName}", token);
+            response.EnsureSuccessStatusCode();
+            
+            Console.WriteLine(response.Content);
+            
+            return await response.Content.ReadFromJsonAsync<List<MusicianResponse>>(cancellationToken: token);
         }
 
-        // Добавление музыканта
-        public async Task<MusicianResponse> AddMusicianAsync(MusicianRequest request, CancellationToken token = default)
-        {
-            var jsonContent = JsonConvert.SerializeObject(request, JsonSettings);
-            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
-            var response = await _httpClient.PostAsync(BaseUrl, content, token);
-
-            if (!response.IsSuccessStatusCode)
-                throw new Exception($"Error adding musician: {response.ReasonPhrase}");
-
-            var responseContent = await response.Content.ReadAsStringAsync(token);
-            return JsonConvert.DeserializeObject<MusicianResponse>(responseContent, JsonSettings);
-        }
-
-        // Удаление музыканта по ID
         public async Task DeleteMusicianAsync(Guid id, CancellationToken token = default)
         {
             var response = await _httpClient.DeleteAsync($"{BaseUrl}/{id}", token);
-
-            if (!response.IsSuccessStatusCode)
-                throw new Exception($"Error deleting musician with ID {id}: {response.ReasonPhrase}");
-        }
-
-        // Метод для поиска музыкантов по фамилии
-        public async Task<List<MusicianResponse>?> SearchMusiciansByLastNameAsync(string lastName,
-            CancellationToken token = default)
-        {
-            try
+            if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
             {
-                if (string.IsNullOrWhiteSpace(lastName))
-                    throw new ArgumentException("Last name cannot be empty.", nameof(lastName));
-
-                var response = await _httpClient.GetAsync($"{BaseUrl}/search?lastName={Uri.EscapeDataString(lastName)}",
-                    token);
-
-                if (!response.IsSuccessStatusCode)
-                    throw new Exception(
-                        $"Error searching musicians by last name \"{lastName}\": {response.ReasonPhrase}");
-
-                var content = await response.Content.ReadAsStringAsync(token);
-
-                return JsonConvert.DeserializeObject<List<MusicianResponse>>(content, JsonSettings);
+                throw new KeyNotFoundException("Musician not found.");
             }
-            catch (Exception e)
-            {
-                Console.WriteLine(e);
-                throw;
-            }
+
+            response.EnsureSuccessStatusCode();
         }
-    }
-
-    // Модели для десериализации данных
-
-    public record Instrument
-    {
-        [JsonProperty("id")]
-        public Guid Id { get; set; }
-
-        [JsonProperty("name")]
-        public string Name { get; set; }
-    }
-
-    public record Concert
-    {
-        [JsonProperty("id")]
-        public Guid Id { get; set; }
-
-        [JsonProperty("name")]
-        public string Name { get; set; }
-
-        [JsonProperty("type")]
-        public string Type { get; set; }
-
-        [JsonProperty("date")]
-        public DateTime Date { get; set; }
     }
 }

@@ -4,7 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:Musical1C__frontend.ViewModels"
              xmlns:models="clr-namespace:Musical1C__frontend.Services"
-             xmlns:responses="clr-namespace:Musical1C__frontend.Services.Responses"
+             xmlns:responses="clr-namespace:Musical1C__frontend.Services"
+             xmlns:resReq="clr-namespace:Musical1C__frontend.Services.ResReq"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Musical1C__frontend.Views.CreateConcertPusyView"
              x:DataType="viewModels:CreateConcertPusyViewModel"
@@ -44,7 +45,7 @@
                             
                             ItemsSource="{Binding MusiciansForAdd}">
                             <ItemsControl.ItemTemplate>
-                                <DataTemplate  DataType="{x:Type responses:MusicianResponse}">
+                                <DataTemplate  DataType="{x:Type resReq:MusicianResponse}">
                                     <Border
                                         BorderBrush="Azure"
                                         Opacity="0.5"
@@ -75,7 +76,7 @@
                         <ItemsControl 
                             ItemsSource="{Binding SoundsForAdd}">
                             <ItemsControl.ItemTemplate>
-                                <DataTemplate  DataType="{x:Type responses:SoundResponse}">
+                                <DataTemplate  DataType="{x:Type resReq:SoundResponse}">
                                     <Border
                                         BorderBrush="Azure"
                                         Opacity="0.5"
@@ -109,7 +110,7 @@
         <ScrollViewer>
             <ItemsControl ItemsSource="{Binding _musicians}">
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate  DataType="{x:Type responses:MusicianResponse}">
+                    <DataTemplate  DataType="{x:Type resReq:MusicianResponse}">
                         <Button 
                             Command="{Binding #siska.DataContext.OnMusicianSelectedCommand}" 
                             CommandParameter="{Binding}" >
@@ -130,7 +131,7 @@
         <ScrollViewer>
             <ItemsControl ItemsSource="{Binding _sounds}">
                 <ItemsControl.ItemTemplate>
-                    <DataTemplate  DataType="{x:Type responses:SoundResponse}">
+                    <DataTemplate  DataType="{x:Type resReq:SoundResponse}">
                         <Button 
                             Command="{Binding #siska.DataContext.OnSoundSelectedCommand}" 
                             CommandParameter="{Binding}" >

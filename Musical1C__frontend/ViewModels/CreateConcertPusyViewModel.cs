@@ -8,8 +8,7 @@ using Avalonia.Controls;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Musical1C__frontend.Services;
-using Musical1C__frontend.Services.Requests;
-using Musical1C__frontend.Services.Responses;
+using Musical1C__frontend.Services.ResReq;
 
 namespace Musical1C__frontend.ViewModels; 
 
@@ -68,27 +67,31 @@ public partial class CreateConcertPusyViewModel : ViewModelBase
     public async Task OnCreateConcertSelected()
     {
         var token = new CancellationToken();
-        var newConcert = new ConcertRequest();
+        var newConcert = new AddConcertRequest();
         
         newConcert.Name = _concertName;
         newConcert.Date = _concertDate;
         newConcert.Type = (_concertType == 0) ? "Групповой" : "Общий";
-        newConcert.Musicians = new List<MusicianIdRequest>();
-        newConcert.Sounds = new List<SoundIdRequest>();
+        newConcert.Musicians = new List<MusicianRequest>();
+        newConcert.Sounds = new List<SoundRequest>();
         
         
         Console.WriteLine($"Creating new concert: {newConcert}");
 
         foreach (var musician in MusiciansForAdd)
         {
-            var newMusician = new MusicianIdRequest(musician.Id);
+            var newMusician = new MusicianRequest(
+                musician.Id,
+                musician.Name,
+                musician.LastName,
+                musician.Surname);
             newConcert.Musicians.Add(newMusician);
             Console.WriteLine($"Creating new musician: {newMusician}");
         };
 
         foreach (var sound in SoundsForAdd)
         {
-            var newSound = new SoundIdRequest(sound.Id);
+            var newSound = new SoundRequest(sound.Id, sound.Name, sound.Author);
             newConcert.Sounds.Add(newSound);
             Console.WriteLine($"Creating new sound: {newSound}");
         }
@@ -153,7 +156,7 @@ public partial class CreateConcertPusyViewModel : ViewModelBase
         try
         {
             CancellationToken token = new CancellationToken();
-            var sounds = await _soundService.GetSoundsAsync(token);
+            var sounds = await _soundService.GetAllMusicAsync(token);
 
             foreach (var sound in sounds)
             {

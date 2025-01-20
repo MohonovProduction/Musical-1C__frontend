@@ -4,7 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:Musical1C__frontend.ViewModels"
              xmlns:models="clr-namespace:Musical1C__frontend.Services"
-             xmlns:responses="clr-namespace:Musical1C__frontend.Services.Responses"
+             xmlns:responses="clr-namespace:Musical1C__frontend.Services"
+             xmlns:resReq="clr-namespace:Musical1C__frontend.Services.ResReq"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Musical1C__frontend.Views.GetHistoryView"
              x:DataType="viewModels:GetHistoryViewModel">
@@ -25,7 +26,7 @@
                 <ItemsControl 
                     ItemsSource="{Binding _concerts}">
                     <ItemsControl.ItemTemplate>
-                        <DataTemplate  DataType="{x:Type responses:ConcertResponse}">
+                        <DataTemplate  DataType="{x:Type resReq:ConcertResponse}">
                             <Border
                                 BorderBrush="Azure"
                                 Opacity="0.5"

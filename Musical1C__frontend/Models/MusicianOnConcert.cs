@@ -1,6 +1,6 @@
 ﻿using System;
 
-namespace Storage;
+namespace Musical1C__frontend.Models;
 
 public class MusicianOnConcert
 {

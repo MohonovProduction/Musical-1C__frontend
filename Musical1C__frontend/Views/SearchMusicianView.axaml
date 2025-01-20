@@ -4,7 +4,8 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
              xmlns:viewModels="clr-namespace:Musical1C__frontend.ViewModels"
              xmlns:services="clr-namespace:Musical1C__frontend.Services"
-             xmlns:responses="clr-namespace:Musical1C__frontend.Services.Responses"
+             xmlns:responses="clr-namespace:Musical1C__frontend.Services"
+             xmlns:resReq="clr-namespace:Musical1C__frontend.Services.ResReq"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Musical1C__frontend.Views.SearchMusicianView"
              x:DataType="viewModels:SearchMusicianViewModel"
@@ -43,7 +44,7 @@
                             <ItemsControl 
                                 ItemsSource="{Binding _musicians}">
                                 <ItemsControl.ItemTemplate>
-                                    <DataTemplate  DataType="{x:Type responses:MusicianResponse}">
+                                    <DataTemplate  DataType="{x:Type resReq:MusicianResponse}">
                                         <Border
                                             BorderBrush="Azure"
                                             Opacity="0.5"

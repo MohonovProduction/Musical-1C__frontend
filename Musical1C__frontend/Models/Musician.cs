@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace Storage
+namespace Musical1C__frontend.Models
 {
     public class Musician
     {

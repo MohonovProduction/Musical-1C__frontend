@@ -2,132 +2,111 @@ using System;
 using System.Collections.Generic;
 using System.Net.Http;
 using System.Text;
+using System.Text.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Musical1C__frontend.Services.Requests;
-using Musical1C__frontend.Services.Responses;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+using Musical1C__frontend.Services.ResReq;
 
-namespace Musical1C__frontend.Services
+namespace Musical1C__frontend.Services;
+
+public class ConcertService
 {
-    public class ConcertService
+    private readonly HttpClient _httpClient;
+    private readonly string _baseUrl = "http://localhost:5017/api/Concert";
+
+    public ConcertService()
     {
-        private readonly HttpClient _httpClient;
-        private const string BaseUrl = "http://localhost:5017/api/Concerts"; // Замените на ваш адрес API
+        _httpClient = new HttpClient{BaseAddress = new Uri(_baseUrl)};
+    }
 
-        public ConcertService()
+    public async Task<ConcertResponse> AddConcertAsync(AddConcertRequest request, CancellationToken token)
+    {
+        var jsonContent = JsonSerializer.Serialize(request);
+        var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+        var response = await _httpClient.PostAsync(_baseUrl, content, token);
+        response.EnsureSuccessStatusCode();
+
+        var responseContent = await response.Content.ReadAsStringAsync(token);
+        return JsonSerializer.Deserialize<ConcertResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+    }
+
+    public async Task<ConcertResponse> GetConcertByIdAsync(Guid id, CancellationToken token)
+    {
+        var response = await _httpClient.GetAsync($"{_baseUrl}/{id}", token);
+        if (response.IsSuccessStatusCode)
         {
-            _httpClient = new HttpClient { BaseAddress = new Uri(BaseUrl) };
-        }
-
-        private static JsonSerializerSettings JsonSettings => new JsonSerializerSettings
-        {
-            PreserveReferencesHandling = PreserveReferencesHandling.Objects,
-            ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
-            Formatting = Formatting.Indented,
-            ContractResolver = new CamelCasePropertyNamesContractResolver()
-        };
-
-        // Получить список концертов
-        public async Task<List<ConcertResponse>> GetConcertsAsync(CancellationToken token = default)
-        {
-            var response = await _httpClient.GetAsync($"{BaseUrl}/all", token);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception($"Error fetching concerts: {response.ReasonPhrase}");
-            }
-
-            var content = await response.Content.ReadAsStringAsync(token);
-            return JsonConvert.DeserializeObject<List<ConcertResponse>>(content, JsonSettings);
-        }
-
-        // Получить концерт по ID
-        public async Task<ConcertResponse> GetConcertByIdAsync(Guid id, CancellationToken token = default)
-        {
-            var response = await _httpClient.GetAsync($"{BaseUrl}/{id}", token);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception($"Error fetching concert with ID {id}: {response.ReasonPhrase}");
-            }
-
-            var content = await response.Content.ReadAsStringAsync(token);
-            return JsonConvert.DeserializeObject<ConcertResponse>(content, JsonSettings);
-        }
-
-        // Добавить концерт
-        public async Task<ConcertResponse> AddConcertAsync(ConcertRequest request, CancellationToken token = default)
-        {
-            var jsonContent = JsonConvert.SerializeObject(request, JsonSettings);
-            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
-            var response = await _httpClient.PostAsync($"{BaseUrl}", content, token);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception($"Error adding concert: {response.ReasonPhrase}");
-            }
-
             var responseContent = await response.Content.ReadAsStringAsync(token);
-            return JsonConvert.DeserializeObject<ConcertResponse>(responseContent, JsonSettings);
+            return JsonSerializer.Deserialize<ConcertResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
         }
 
-        // Удалить концерт по ID
-        public async Task DeleteConcertAsync(Guid id, CancellationToken token = default)
+        if (response.StatusCode == System.Net.HttpStatusCode.NotFound)
+            return null;
+
+        response.EnsureSuccessStatusCode();
+        return null;
+    }
+
+    public async Task<List<ConcertResponse>> GetConcertsAsync(CancellationToken token)
+    {
+        var response = await _httpClient.GetAsync(_baseUrl, token);
+        response.EnsureSuccessStatusCode();
+
+        var responseContent = await response.Content.ReadAsStringAsync(token);
+        return JsonSerializer.Deserialize<List<ConcertResponse>>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+    }
+
+    public async Task AddMusicianToConcertAsync(Guid concertId, AddMusicianToConcertRequest request, CancellationToken token)
+    {
+        var jsonContent = JsonSerializer.Serialize(request);
+        var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+        var response = await _httpClient.PutAsync($"{_baseUrl}/{concertId}/musician", content, token);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task AddSoundToConcertAsync(Guid concertId, AddSoundToConcertRequest request, CancellationToken token)
+    {
+        var jsonContent = JsonSerializer.Serialize(request);
+        var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+        var response = await _httpClient.PutAsync($"{_baseUrl}/{concertId}/sound", content, token);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task DeleteConcertAsync(Guid id, CancellationToken token)
+    {
+        var response = await _httpClient.DeleteAsync($"{_baseUrl}/{id}", token);
+        response.EnsureSuccessStatusCode();
+    }
+
+    public async Task RemoveMusicianFromConcertAsync(Guid concertId, RemoveMusicianFromConcertRequest request, CancellationToken token)
+    {
+        var jsonContent = JsonSerializer.Serialize(request);
+        var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+        var response = await _httpClient.SendAsync(new HttpRequestMessage
         {
-            var response = await _httpClient.DeleteAsync($"{BaseUrl}/{id}", token);
+            Method = HttpMethod.Delete,
+            RequestUri = new Uri($"{_baseUrl}/{concertId}/musician"),
+            Content = content
+        }, token);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception($"Error deleting concert with ID {id}: {response.ReasonPhrase}");
-            }
-        }
+        response.EnsureSuccessStatusCode();
+    }
 
-        // Добавить музыканта к концерту
-        public async Task AddMusicianToConcertAsync(Guid concertId, Guid musicianId, CancellationToken token = default)
+    public async Task RemoveSoundFromConcertAsync(Guid concertId, RemoveSoundFromConcertRequest request, CancellationToken token)
+    {
+        var jsonContent = JsonSerializer.Serialize(request);
+        var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+
+        var response = await _httpClient.SendAsync(new HttpRequestMessage
         {
-            var response = await _httpClient.PostAsync($"{BaseUrl}/{concertId}/Musicians/{musicianId}", null, token);
+            Method = HttpMethod.Delete,
+            RequestUri = new Uri($"{_baseUrl}/{concertId}/sound"),
+            Content = content
+        }, token);
 
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception($"Error adding musician to concert: {response.ReasonPhrase}");
-            }
-        }
-
-        // Удалить музыканта из концерта
-        public async Task RemoveMusicianFromConcertAsync(Guid concertId, Guid musicianId, CancellationToken token = default)
-        {
-            var response = await _httpClient.DeleteAsync($"{BaseUrl}/{concertId}/Musicians/{musicianId}", token);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception($"Error removing musician from concert: {response.ReasonPhrase}");
-            }
-        }
-
-        // Добавить звук к концерту
-        public async Task AddSoundToConcertAsync(Guid concertId, Guid soundId, CancellationToken token = default)
-        {
-            var response = await _httpClient.PostAsync($"{BaseUrl}/{concertId}/Sounds/{soundId}", null, token);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception($"Error adding sound to concert: {response.ReasonPhrase}");
-            }
-        }
-
-        // Удалить звук из концерта
-        public async Task RemoveSoundFromConcertAsync(Guid concertId, Guid soundId, CancellationToken token = default)
-        {
-            var response = await _httpClient.DeleteAsync($"{BaseUrl}/{concertId}/Sounds/{soundId}", token);
-
-            if (!response.IsSuccessStatusCode)
-            {
-                throw new Exception($"Error removing sound from concert: {response.ReasonPhrase}");
-            }
-        }
-
+        response.EnsureSuccessStatusCode();
     }
 }

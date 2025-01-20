@@ -1,91 +1,75 @@
 using System;
 using System.Collections.Generic;
 using System.Net.Http;
-using System.Text;
+using System.Net.Http.Json;
 using System.Threading;
 using System.Threading.Tasks;
-using Musical1C__frontend.Services.Requests;
-using Musical1C__frontend.Services.Responses;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
+using Musical1C__frontend.Services.ResReq;
+using WebStation.Trains;
 
-namespace Musical1C__frontend.Services
+namespace Musical1C__frontend.Services;
+
+public class SoundService
 {
-    public class SoundService
+    private readonly HttpClient _httpClient;
+    private const string BaseUrl = "http://localhost:5017/api/Sound";
+
+    public SoundService()
     {
-        private readonly HttpClient _httpClient;
-        private const string BaseUrl = "http://localhost:5017/api/Sounds"; // Replace with your API address
+        _httpClient = new HttpClient{BaseAddress = new Uri(BaseUrl)};
+    }
 
-        public SoundService()
+    // Добавление музыкального произведения
+    public async Task<SoundResponse> AddMusicAsync(AddSoundRequest request, CancellationToken cancellationToken)
+    {
+        var response = await _httpClient.PostAsJsonAsync(BaseUrl, request, cancellationToken);
+
+        if (response.IsSuccessStatusCode)
         {
-            _httpClient = new HttpClient { BaseAddress = new Uri(BaseUrl) };
+            return await response.Content.ReadFromJsonAsync<SoundResponse>(cancellationToken: cancellationToken);
         }
 
-        private static JsonSerializerSettings JsonSettings => new JsonSerializerSettings
+        var error = await response.Content.ReadAsStringAsync(cancellationToken);
+        throw new HttpRequestException($"Error adding music: {response.StatusCode}, {error}");
+    }
+
+    // Удаление музыкального произведения
+    public async Task DeleteMusicAsync(Guid id, CancellationToken cancellationToken)
+    {
+        var response = await _httpClient.DeleteAsync($"{BaseUrl}/{id}", cancellationToken);
+
+        if (!response.IsSuccessStatusCode)
         {
-            PreserveReferencesHandling = PreserveReferencesHandling.Objects,
-            ReferenceLoopHandling = ReferenceLoopHandling.Serialize,
-            Formatting = Formatting.Indented,
-            ContractResolver = new CamelCasePropertyNamesContractResolver()
-        };
-
-        // Get all sounds
-        public async Task<List<SoundResponse>> GetSoundsAsync(CancellationToken token = default)
-        {
-            var response = await _httpClient.GetAsync(BaseUrl, token);
-            response.EnsureSuccessStatusCode();
-            var content = await response.Content.ReadAsStringAsync(token);
-            return JsonConvert.DeserializeObject<List<SoundResponse>>(content, JsonSettings);
-        }
-
-        // Get sound by ID
-        public async Task<SoundResponse> GetSoundByIdAsync(Guid id, CancellationToken token = default)
-        {
-            var response = await _httpClient.GetAsync($"{BaseUrl}/{id}", token);
-
-            if (!response.IsSuccessStatusCode)
-                throw new Exception($"Error fetching sound with ID {id}: {response.ReasonPhrase}");
-
-            var content = await response.Content.ReadAsStringAsync(token);
-            return JsonConvert.DeserializeObject<SoundResponse>(content, JsonSettings);
-        }
-
-        // Add a sound
-        public async Task<SoundResponse> AddSoundAsync(SoundRequest request, CancellationToken token = default)
-        {
-            var jsonContent = JsonConvert.SerializeObject(request, JsonSettings);
-            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
-
-            var response = await _httpClient.PostAsync(BaseUrl, content, token);
-
-            if (!response.IsSuccessStatusCode)
-                throw new Exception($"Error adding sound: {response.ReasonPhrase}");
-
-            var responseContent = await response.Content.ReadAsStringAsync(token);
-            return JsonConvert.DeserializeObject<SoundResponse>(responseContent, JsonSettings);
-        }
-
-        // Delete a sound by ID
-        public async Task DeleteSoundAsync(Guid id, CancellationToken token = default)
-        {
-            var response = await _httpClient.DeleteAsync($"{BaseUrl}/{id}", token);
-
-            if (!response.IsSuccessStatusCode)
-                throw new Exception($"Error deleting sound with ID {id}: {response.ReasonPhrase}");
+            var error = await response.Content.ReadAsStringAsync(cancellationToken);
+            throw new HttpRequestException($"Error deleting music: {response.StatusCode}, {error}");
         }
     }
 
-    // Models for deserialization
-
-    public record SoundOnConcertResponse
+    // Получение списка всех музыкальных произведений
+    public async Task<List<SoundResponse>> GetAllMusicAsync(CancellationToken cancellationToken)
     {
-        [JsonProperty("id")]
-        public Guid Id { get; set; }
+        var response = await _httpClient.GetAsync(BaseUrl, cancellationToken);
 
-        [JsonProperty("soundId")]
-        public Guid SoundId { get; set; }
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadFromJsonAsync<List<SoundResponse>>(cancellationToken: cancellationToken);
+        }
 
-        [JsonProperty("concertId")]
-        public Guid ConcertId { get; set; }
+        var error = await response.Content.ReadAsStringAsync(cancellationToken);
+        throw new HttpRequestException($"Error fetching music list: {response.StatusCode}, {error}");
+    }
+
+    // Получение музыкального произведения по ID
+    public async Task<SoundResponse> GetMusicByIdAsync(Guid id, CancellationToken cancellationToken)
+    {
+        var response = await _httpClient.GetAsync($"{BaseUrl}/{id}", cancellationToken);
+
+        if (response.IsSuccessStatusCode)
+        {
+            return await response.Content.ReadFromJsonAsync<SoundResponse>(cancellationToken: cancellationToken);
+        }
+
+        var error = await response.Content.ReadAsStringAsync(cancellationToken);
+        throw new HttpRequestException($"Error fetching music by ID: {response.StatusCode}, {error}");
     }
 }

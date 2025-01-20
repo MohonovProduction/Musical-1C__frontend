@@ -5,7 +5,7 @@ using System.Threading.Tasks;
 using System.Windows.Input;
 using CommunityToolkit.Mvvm.Input;
 using Musical1C__frontend.Services;
-using Musical1C__frontend.Services.Responses;
+using Musical1C__frontend.Services.ResReq;
 
 namespace Musical1C__frontend.ViewModels;
 
