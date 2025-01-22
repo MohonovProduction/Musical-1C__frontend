@@ -12,41 +12,61 @@
              Name="siska"
              x:CompileBindings="False"
              >
-    <StackPanel Orientation="Horizontal">
-        <Grid
-            Margin="5"
-            ShowGridLines="False"
-            ColumnDefinitions="200,*"
-            RowDefinitions="Auto,Auto, Auto, *">
-            <Button Command="{ Binding SwitchToMainContentViewModelCommand }" Grid.Column="0" Grid.Row="0" Content="Main Page" Width="110" Margin="1 1"></Button>
-        </Grid>
+    
+    <StackPanel
+        Orientation="Vertical">
         
-        <StackPanel
-            Spacing="5">
-            <TextBox
-                Text="{Binding ConcertName}"
-                Watermark="Title"
-            ></TextBox>
-            <DatePicker
-                SelectedDate="{Binding ConcertDate}"></DatePicker>
-            <ComboBox
-                SelectedIndex="{Binding ConcertType}">
-                <ComboBoxItem Content="Общий"></ComboBoxItem>
-                <ComboBoxItem Content="Групповой"></ComboBoxItem>
-            </ComboBox>
-            
+        <Border Background="Gray"
+                HorizontalAlignment="Stretch"
+                CornerRadius="10"
+                Padding="10"
+                Margin="10"
+                IsVisible="{Binding ShowStateMessage}">
+            <TextBlock Text="{Binding StateMessage}" Foreground="White" />
+        </Border>
+        
+        <StackPanel Orientation="Horizontal">
             <StackPanel
-                Orientation="Horizontal">
-                
-                <ScrollViewer>
+                Margin="10"
+                >
+                <Button Command="{ Binding SwitchToMainContentViewModelCommand }" Grid.Column="0" Grid.Row="0" Content="Main Page" Width="110" Margin="1 1"></Button>
+            </StackPanel>
+            
+            <ScrollViewer>
+                 <StackPanel
+                    Margin="10"
+                    Spacing="5">
+                    <TextBox
+                        Text="{Binding ConcertName}"
+                        Watermark="Title"
+                    ></TextBox>
+                    <DatePicker
+                        SelectedDate="{Binding ConcertDate}"></DatePicker>
+                    <ComboBox
+                        SelectedIndex="{Binding ConcertType}">
+                        <ComboBoxItem Content="Общий"></ComboBoxItem>
+                        <ComboBoxItem Content="Групповой"></ComboBoxItem>
+                    </ComboBox>
+                    
                     <StackPanel
-                        Spacing="5">
-                        <ItemsControl 
-                            
-                            ItemsSource="{Binding MusiciansForAdd}">
+                        Orientation="Horizontal"
+                        Spacing="5"
+                        Margin="10"
+                        >
+                        
+                        <ItemsControl ItemsSource="{Binding MusiciansForAdd}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel
+                                        Spacing="3"
+                                        HorizontalAlignment="Stretch">
+                                    </StackPanel>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate  DataType="{x:Type resReq:MusicianResponse}">
                                     <Border
+                                        HorizontalAlignment="Stretch"
                                         BorderBrush="Azure"
                                         Opacity="0.5"
                                         BorderThickness="2"
@@ -67,17 +87,20 @@
                                 </DataTemplate>
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
-                    </StackPanel>
-                </ScrollViewer>
-                
-                <ScrollViewer>
-                    <StackPanel
-                        Spacing="5">
-                        <ItemsControl 
-                            ItemsSource="{Binding SoundsForAdd}">
+                    
+                        <ItemsControl ItemsSource="{Binding SoundsForAdd}">
+                            <ItemsControl.ItemsPanel>
+                                <ItemsPanelTemplate>
+                                    <StackPanel
+                                        Spacing="3"
+                                        HorizontalAlignment="Stretch">
+                                    </StackPanel>
+                                </ItemsPanelTemplate>
+                            </ItemsControl.ItemsPanel>
                             <ItemsControl.ItemTemplate>
                                 <DataTemplate  DataType="{x:Type resReq:SoundResponse}">
                                     <Border
+                                        HorizontalAlignment="Stretch"
                                         BorderBrush="Azure"
                                         Opacity="0.5"
                                         BorderThickness="2"
@@ -98,53 +121,77 @@
                             </ItemsControl.ItemTemplate>
                         </ItemsControl>
                     </StackPanel>
-                </ScrollViewer>
-            </StackPanel>
+                    
+                    <Button
+                        Command="{Binding OnCreateConcertCommand}">Create Concert</Button>
+                </StackPanel>
+            </ScrollViewer>
             
-            <Button
-                Command="{Binding OnCreateConcertCommand}">Create Concert</Button>
-        </StackPanel>
-            
-        
-        
-        <ScrollViewer>
-            <ItemsControl ItemsSource="{Binding _musicians}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate  DataType="{x:Type resReq:MusicianResponse}">
-                        <Button 
-                            Command="{Binding #siska.DataContext.OnMusicianSelectedCommand}" 
-                            CommandParameter="{Binding}" >
-                            <StackPanel>  
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,12">
-                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
-                                    <TextBlock Text="{Binding LastName}" VerticalAlignment="Center"/>
-                                    <TextBlock Text="{Binding Surname}" VerticalAlignment="Center"/>
-                                
-                                </StackPanel>
+            <ScrollViewer>
+                <ItemsControl ItemsSource="{Binding _musicians}" >
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel
+                                Margin="10"
+                                Spacing="5"
+                                HorizontalAlignment="Stretch">
                             </StackPanel>
-                        </Button>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
-        
-        <ScrollViewer>
-            <ItemsControl ItemsSource="{Binding _sounds}">
-                <ItemsControl.ItemTemplate>
-                    <DataTemplate  DataType="{x:Type resReq:SoundResponse}">
-                        <Button 
-                            Command="{Binding #siska.DataContext.OnSoundSelectedCommand}" 
-                            CommandParameter="{Binding}" >
-                            <StackPanel>  
-                                <StackPanel Orientation="Horizontal" VerticalAlignment="Center" Margin="0,0,0,12">
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate  DataType="{x:Type resReq:MusicianResponse}">
+                            <Button 
+                                HorizontalAlignment="Stretch"
+                                Command="{Binding #siska.DataContext.OnMusicianSelectedCommand}" 
+                                CommandParameter="{Binding}" >
+                                <StackPanel 
+                                    Orientation="Horizontal" 
+                                    VerticalAlignment="Center" 
+                                    Margin="0,0,0,12"
+                                    Spacing="2"
+                                    >
+                                    <TextBlock Text="{Binding LastName}" VerticalAlignment="Center"/>
+                                    <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
+                                    <TextBlock Text="{Binding Surname}" VerticalAlignment="Center"/>
+                                </StackPanel>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+            
+            <ScrollViewer>
+                <ItemsControl ItemsSource="{Binding _sounds}">
+                    <ItemsControl.ItemsPanel>
+                        <ItemsPanelTemplate>
+                            <StackPanel
+                                Margin="10"
+                                Spacing="5"
+                                HorizontalAlignment="Stretch">
+                            </StackPanel>
+                        </ItemsPanelTemplate>
+                    </ItemsControl.ItemsPanel>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate  DataType="{x:Type resReq:SoundResponse}">
+                            <Button 
+                                HorizontalAlignment="Stretch"
+                                Command="{Binding #siska.DataContext.OnSoundSelectedCommand}" 
+                                CommandParameter="{Binding}" >
+                                <StackPanel 
+                                    Orientation="Horizontal" 
+                                    VerticalAlignment="Center" 
+                                    Margin="0,0,0,12"
+                                    Spacing="2"
+                                    >
                                     <TextBlock Text="{Binding Name}" VerticalAlignment="Center" />
                                     <TextBlock Text="{Binding Author}" VerticalAlignment="Center"/>
                                 </StackPanel>
-                            </StackPanel>
-                        </Button>
-                    </DataTemplate>
-                </ItemsControl.ItemTemplate>
-            </ItemsControl>
-        </ScrollViewer>
+                            </Button>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </StackPanel>
     </StackPanel>
+    
 </UserControl>

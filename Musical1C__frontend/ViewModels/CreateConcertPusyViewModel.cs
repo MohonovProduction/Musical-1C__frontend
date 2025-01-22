@@ -26,6 +26,11 @@ public partial class CreateConcertPusyViewModel : ViewModelBase
 
     public ObservableCollection<MusicianResponse> MusiciansForAdd { get; set; }
     public ObservableCollection<SoundResponse> SoundsForAdd { get; set; }
+    
+    [ObservableProperty]
+    private string _stateMessage;
+    [ObservableProperty]
+    private bool _showStateMessage;
 
     private readonly MusicianService _musicianService;
     private readonly SoundService _soundService;
@@ -64,18 +69,35 @@ public partial class CreateConcertPusyViewModel : ViewModelBase
     [ObservableProperty] 
     private int _concertType;
 
+    private async Task ShowMessageAsync(string message, int duration = 5000)
+    {
+        StateMessage = message;
+        //_showStateMessage = true;
+        ShowStateMessage = true;
+        await Task.Delay(duration);
+        ShowStateMessage = false;
+        //_showStateMessage = false;
+    }
+    
     public async Task OnCreateConcertSelected()
     {
         var token = new CancellationToken();
-        var newConcert = new AddConcertRequest();
-        
-        newConcert.Name = _concertName;
-        newConcert.Date = _concertDate;
-        newConcert.Type = (_concertType == 0) ? "Групповой" : "Общий";
-        newConcert.Musicians = new List<MusicianRequest>();
-        newConcert.Sounds = new List<SoundRequest>();
-        
-        
+
+        if (string.IsNullOrWhiteSpace(_concertName) || _concertDate == default || _concertType < 0 || MusiciansForAdd == null || SoundsForAdd == null)
+        {
+            await ShowMessageAsync("Invalid input data. Please check concert details.");
+            return;
+        }
+
+        var newConcert = new AddConcertRequest
+        {
+            Name = _concertName,
+            Date = _concertDate,
+            Type = (_concertType == 0) ? "Групповой" : "Общий",
+            Musicians = new List<MusicianRequest>(),
+            Sounds = new List<SoundRequest>()
+        };
+
         Console.WriteLine($"Creating new concert: {newConcert}");
 
         foreach (var musician in MusiciansForAdd)
@@ -87,7 +109,7 @@ public partial class CreateConcertPusyViewModel : ViewModelBase
                 musician.Surname);
             newConcert.Musicians.Add(newMusician);
             Console.WriteLine($"Creating new musician: {newMusician}");
-        };
+        }
 
         foreach (var sound in SoundsForAdd)
         {
@@ -95,37 +117,50 @@ public partial class CreateConcertPusyViewModel : ViewModelBase
             newConcert.Sounds.Add(newSound);
             Console.WriteLine($"Creating new sound: {newSound}");
         }
-        
-        Console.WriteLine($"Creating new concert: {newConcert}");
 
         try
         {
             await _concertService.AddConcertAsync(newConcert, token);
+            await ShowMessageAsync("Concert created successfully", 3000);
         }
         catch (Exception e)
         {
             Console.WriteLine(e);
+            await ShowMessageAsync("Error creating new concert, call to the support\n+88005553535 - Zinaida Pavlovna", 10000);
             throw;
         }
     }
     
     public void OnMusicianSelected(MusicianResponse? musicianResponse)
     {
-        //TODO: Сделать проверу на то, что элемент существует, если да -- нахуй его в печь
-        //TODO: Проверить, добавлен ли
         if (musicianResponse != null)
         {
-            MusiciansForAdd.Add(musicianResponse);
+            // Проверяем, существует ли элемент в коллекции
+            if (MusiciansForAdd.Contains(musicianResponse))
+            {
+                // Убираем его из массива
+                MusiciansForAdd.Remove(musicianResponse);
+            }
+            else
+            {
+                // Добавляем элемент, если его нет в коллекции
+                MusiciansForAdd.Add(musicianResponse);
+            }
         }
     }
 
     public void OnSoundSelected(SoundResponse? soundResponse)
     {
-        //TODO: Сделать проверу на то, что элемент существует, если да -- нахуй его в печь
-        //TODO: Проверить, добавлен ли
         if (soundResponse != null)
         {
-            SoundsForAdd.Add(soundResponse);
+            if (SoundsForAdd.Contains(soundResponse))
+            {
+                SoundsForAdd.Remove(soundResponse);
+            }
+            else
+            {
+                SoundsForAdd.Add(soundResponse);
+            }
         }
     }
 

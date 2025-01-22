@@ -21,15 +21,35 @@ public class ConcertService
 
     public async Task<ConcertResponse> AddConcertAsync(AddConcertRequest request, CancellationToken token)
     {
-        var jsonContent = JsonSerializer.Serialize(request);
-        var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
+        try
+        {
+            var jsonContent = JsonSerializer.Serialize(request);
+            var content = new StringContent(jsonContent, Encoding.UTF8, "application/json");
 
-        var response = await _httpClient.PostAsync(_baseUrl, content, token);
-        response.EnsureSuccessStatusCode();
+            var response = await _httpClient.PostAsync(_baseUrl, content, token);
 
-        var responseContent = await response.Content.ReadAsStringAsync(token);
-        return JsonSerializer.Deserialize<ConcertResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            if (!response.IsSuccessStatusCode)
+            {
+                throw new HttpRequestException($"Request failed with status code: {response.StatusCode}");
+            }
+
+            var responseContent = await response.Content.ReadAsStringAsync(token);
+
+            var concertResponse = JsonSerializer.Deserialize<ConcertResponse>(responseContent, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+            if (concertResponse == null)
+            {
+                throw new InvalidOperationException("Deserialization resulted in a null object.");
+            }
+
+            return concertResponse;
+        }
+        catch (Exception ex)
+        {
+            // Логируем или обрабатываем исключение
+            throw new InvalidOperationException("An error occurred while adding a concert.", ex);
+        }
     }
+
 
     public async Task<ConcertResponse> GetConcertByIdAsync(Guid id, CancellationToken token)
     {
